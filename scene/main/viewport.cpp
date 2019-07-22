@@ -581,7 +581,7 @@ void Viewport::_notification(int p_what) {
 					if (physics_object_capture != 0) {
 
 						CollisionObject *co = Object::cast_to<CollisionObject>(ObjectDB::get_instance(physics_object_capture));
-						if (co) {
+						if (co && camera) {
 							_collision_object_input_event(co, camera, ev, Vector3(), Vector3(), 0);
 							captured = true;
 							if (mb.is_valid() && mb->get_button_index() == 1 && !mb->is_pressed()) {
@@ -2579,7 +2579,7 @@ void Viewport::_drop_physics_mouseover() {
 
 List<Control *>::Element *Viewport::_gui_show_modal(Control *p_control) {
 
-	gui.modal_stack.push_back(p_control);
+	List<Control *>::Element *node = gui.modal_stack.push_back(p_control);
 	if (gui.key_focus)
 		p_control->_modal_set_prev_focus_owner(gui.key_focus->get_instance_id());
 	else
@@ -2590,7 +2590,7 @@ List<Control *>::Element *Viewport::_gui_show_modal(Control *p_control) {
 		_drop_mouse_focus();
 	}
 
-	return gui.modal_stack.back();
+	return node;
 }
 
 Control *Viewport::_gui_get_focus_owner() {

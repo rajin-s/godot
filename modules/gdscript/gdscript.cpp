@@ -2199,7 +2199,7 @@ RES ResourceFormatLoaderGDScript::load(const String &p_path, const String &p_ori
 		ERR_FAIL_COND_V(err != OK, RES());
 
 		script->set_script_path(p_original_path); // script needs this.
-		script->set_path(p_original_path);
+		script->set_path(p_original_path, true);
 
 		script->reload();
 	}

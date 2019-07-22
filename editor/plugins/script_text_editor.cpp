@@ -765,10 +765,17 @@ void ScriptEditor::_update_modified_scripts_for_external_editor(Ref<Script> p_fo
 		if (last_date != date) {
 
 			Ref<Script> rel_script = ResourceLoader::load(script->get_path(), script->get_class(), true);
+
 			ERR_CONTINUE(!rel_script.is_valid());
+
 			script->set_source_code(rel_script->get_source_code());
 			script->set_last_modified_time(rel_script->get_last_modified_time());
 			script->update_exports();
+
+			const bool do_soft_reload = script->is_tool();
+			script->get_language()->reload_tool_script(script, do_soft_reload);
+
+			print_line("Reload externally modified script: '" + script->get_path() + "'");
 		}
 	}
 }

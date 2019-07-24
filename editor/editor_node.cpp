@@ -2239,7 +2239,7 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 		case RUN_PLAY_CUSTOM_SCENE: {
 			if (run_custom_filename.empty() || editor_run.get_status() == EditorRun::STATUS_STOP) {
 				_menu_option_confirm(RUN_STOP, true);
-				quick_run->popup_dialog("PackedScene", true);
+				quick_run->popup_dialog("PackedScene", false, false, true);
 				quick_run->set_title(TTR("Quick Run Scene..."));
 				play_custom_scene_button->set_pressed(false);
 			} else {

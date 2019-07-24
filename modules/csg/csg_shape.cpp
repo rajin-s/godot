@@ -167,6 +167,8 @@ CSGBrush *CSGShape::_get_brush() {
 				continue;
 			if (!child->is_visible_in_tree())
 				continue;
+			if (child->is_ignoring())
+				continue;
 
 			CSGBrush *n2 = child->_get_brush();
 			if (!n2)
@@ -569,6 +571,18 @@ void CSGShape::set_calculate_tangents(bool p_calculate_tangents) {
 	_make_dirty();
 }
 
+void CSGShape::set_ignore(bool p_value) {
+	ignore = p_value;
+	_make_dirty();
+	if (parent) {
+		parent->_make_dirty();
+	}
+}
+
+bool CSGShape::is_ignoring() const {
+	return ignore;
+}
+
 bool CSGShape::is_calculating_tangents() const {
 	return calculate_tangents;
 }
@@ -624,11 +638,15 @@ void CSGShape::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_calculate_tangents", "enabled"), &CSGShape::set_calculate_tangents);
 	ClassDB::bind_method(D_METHOD("is_calculating_tangents"), &CSGShape::is_calculating_tangents);
 
+	ClassDB::bind_method(D_METHOD("set_ignore", "enabled"), &CSGShape::set_ignore);
+	ClassDB::bind_method(D_METHOD("is_ignoring"), &CSGShape::is_ignoring);
+
 	ClassDB::bind_method(D_METHOD("get_meshes"), &CSGShape::get_meshes);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "operation", PROPERTY_HINT_ENUM, "Union,Intersection,Subtraction"), "set_operation", "get_operation");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "snap", PROPERTY_HINT_RANGE, "0.0001,1,0.001"), "set_snap", "get_snap");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "calculate_tangents"), "set_calculate_tangents", "is_calculating_tangents");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "ignore"), "set_ignore", "is_ignoring");
 
 	ADD_GROUP("Collision", "collision_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_collision"), "set_use_collision", "is_using_collision");
@@ -650,6 +668,7 @@ CSGShape::CSGShape() {
 	collision_layer = 1;
 	collision_mask = 1;
 	calculate_tangents = true;
+	ignore = false;
 	set_notify_local_transform(true);
 }
 

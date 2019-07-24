@@ -67,6 +67,7 @@ private:
 	RID root_collision_instance;
 
 	bool calculate_tangents;
+	bool ignore;
 
 	Ref<ArrayMesh> root_mesh;
 
@@ -147,6 +148,9 @@ public:
 
 	void set_calculate_tangents(bool p_calculate_tangents);
 	bool is_calculating_tangents() const;
+
+	void set_ignore(bool p_value);
+	bool is_ignoring() const;
 
 	bool is_root_shape() const;
 	CSGShape();

@@ -2963,7 +2963,7 @@ Node::Node() {
 	data.in_constructor = true;
 	data.viewport = NULL;
 	data.use_placeholder = false;
-	data.display_folded = false;
+	data.display_folded = true;
 	data.ready_first = true;
 
 	orphan_node_count++;

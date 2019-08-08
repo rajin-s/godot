@@ -669,7 +669,7 @@ void CPUParticles::_particles_process(float p_delta) {
 			float tex_angular_velocity = get_parameter_curve_value(PARAM_ANGULAR_VELOCITY, normalized_lifetime, default_multiply);
 			float tex_linear_accel = get_parameter_curve_value(PARAM_LINEAR_ACCEL, normalized_lifetime, default_multiply);
 			float tex_tangential_accel = get_parameter_curve_value(PARAM_TANGENTIAL_ACCEL, normalized_lifetime, default_multiply);
-			float tex_radial_accel = get_parameter_curve_value(PARAM_RADIAL_ACCEL, normalized_lifetime, default_add);
+			float tex_radial_accel = get_parameter_curve_value(PARAM_RADIAL_ACCEL, normalized_lifetime, default_multiply);
 			float tex_damping = get_parameter_curve_value(PARAM_DAMPING, normalized_lifetime, default_multiply);
 			float tex_angle = get_parameter_curve_value(PARAM_ANGLE, normalized_lifetime, default_add);
 			float tex_anim_speed = get_parameter_curve_value(PARAM_ANIM_SPEED, normalized_lifetime, default_multiply);

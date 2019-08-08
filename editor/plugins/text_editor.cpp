@@ -313,6 +313,11 @@ void TextEditor::goto_line(int p_line, bool p_with_error) {
 	code_editor->goto_line(p_line);
 }
 
+void TextEditor::goto_line_selection(int p_line, int p_begin, int p_end) {
+
+	code_editor->goto_line_selection(p_line, p_begin, p_end);
+}
+
 void TextEditor::set_executing_line(int p_line) {
 
 	code_editor->set_executing_line(p_line);
@@ -693,6 +698,15 @@ TextEditor::TextEditor() {
 	bookmarks_menu->get_popup()->connect("index_pressed", this, "_bookmark_item_pressed");
 
 	code_editor->get_text_edit()->set_drag_forwarding(this);
+}
+
+TextEditor::~TextEditor() {
+	for (const Map<String, SyntaxHighlighter *>::Element *E = highlighters.front(); E; E = E->next()) {
+		if (E->get() != NULL) {
+			memdelete(E->get());
+		}
+	}
+	highlighters.clear();
 }
 
 void TextEditor::validate() {

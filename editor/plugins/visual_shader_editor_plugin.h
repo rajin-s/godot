@@ -48,7 +48,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	virtual Control *create_editor(const Ref<VisualShaderNode> &p_node);
+	virtual Control *create_editor(const Ref<Resource> &p_parent_resource, const Ref<VisualShaderNode> &p_node);
 };
 
 class VisualShaderEditor : public VBoxContainer {
@@ -176,7 +176,20 @@ class VisualShaderEditor : public VBoxContainer {
 
 	void _port_name_focus_out(Object *line_edit, int p_node_id, int p_port_id, bool p_output);
 
+	void _dup_copy_nodes(int p_type, List<int> &r_nodes, Set<int> &r_excluded);
+	void _dup_update_excluded(int p_type, Set<int> &r_excluded);
+	void _dup_paste_nodes(int p_type, int p_pasted_type, List<int> &r_nodes, Set<int> &r_excluded, const Vector2 &p_offset, bool p_select);
+
 	void _duplicate_nodes();
+
+	Vector2 selection_center;
+	int copy_type; // shader type
+	List<int> copy_nodes_buffer;
+	Set<int> copy_nodes_excluded_buffer;
+
+	void _clear_buffer();
+	void _copy_nodes();
+	void _paste_nodes();
 
 	Vector<Ref<VisualShaderNodePlugin> > plugins;
 
@@ -259,7 +272,7 @@ class VisualShaderNodePluginDefault : public VisualShaderNodePlugin {
 	GDCLASS(VisualShaderNodePluginDefault, VisualShaderNodePlugin);
 
 public:
-	virtual Control *create_editor(const Ref<VisualShaderNode> &p_node);
+	virtual Control *create_editor(const Ref<Resource> &p_parent_resource, const Ref<VisualShaderNode> &p_node);
 };
 
 class EditorPropertyShaderMode : public EditorProperty {

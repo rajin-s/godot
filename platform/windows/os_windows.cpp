@@ -719,7 +719,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 						pressrc = 0;
 					}
 				}
-			} else if (mouse_mode != MOUSE_MODE_CAPTURED) {
+			} else {
 				// for reasons unknown to mankind, wheel comes in screen coordinates
 				POINT coords;
 				coords.x = mb->get_position().x;
@@ -1537,6 +1537,7 @@ void OS_Windows::finalize() {
 	memdelete(camera_server);
 	touch_state.clear();
 
+	cursors_cache.clear();
 	visual_server->finish();
 	memdelete(visual_server);
 #ifdef OPENGL_ENABLED
@@ -1812,7 +1813,7 @@ Size2 OS_Windows::get_min_window_size() const {
 void OS_Windows::set_min_window_size(const Size2 p_size) {
 
 	if ((p_size != Size2()) && (max_size != Size2()) && ((p_size.x > max_size.x) || (p_size.y > max_size.y))) {
-		WARN_PRINT("Minimum window size can't be larger than maximum window size!");
+		ERR_PRINT("Minimum window size can't be larger than maximum window size!");
 		return;
 	}
 	min_size = p_size;
@@ -1821,7 +1822,7 @@ void OS_Windows::set_min_window_size(const Size2 p_size) {
 void OS_Windows::set_max_window_size(const Size2 p_size) {
 
 	if ((p_size != Size2()) && ((p_size.x < min_size.x) || (p_size.y < min_size.y))) {
-		WARN_PRINT("Maximum window size can't be smaller than minimum window size!");
+		ERR_PRINT("Maximum window size can't be smaller than minimum window size!");
 		return;
 	}
 	max_size = p_size;
@@ -2251,9 +2252,17 @@ uint64_t OS_Windows::get_unix_time() const {
 	FILETIME fep;
 	SystemTimeToFileTime(&ep, &fep);
 
-	// FIXME: dereferencing type-punned pointer will break strict-aliasing rules (GCC warning)
+	// Type punning through unions (rather than pointer cast) as per:
 	// https://docs.microsoft.com/en-us/windows/desktop/api/minwinbase/ns-minwinbase-filetime#remarks
-	return (*(uint64_t *)&ft - *(uint64_t *)&fep) / 10000000;
+	ULARGE_INTEGER ft_punning;
+	ft_punning.LowPart = ft.dwLowDateTime;
+	ft_punning.HighPart = ft.dwHighDateTime;
+
+	ULARGE_INTEGER fep_punning;
+	fep_punning.LowPart = fep.dwLowDateTime;
+	fep_punning.HighPart = fep.dwHighDateTime;
+
+	return (ft_punning.QuadPart - fep_punning.QuadPart) / 10000000;
 };
 
 uint64_t OS_Windows::get_system_time_secs() const {

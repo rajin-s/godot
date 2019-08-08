@@ -322,6 +322,7 @@
 			<description>
 				The natural exponential function. It raises the mathematical constant [b]e[/b] to the power of [code]s[/code] and returns it.
 				[b]e[/b] has an approximate value of 2.71828.
+				For exponents to other bases use the method [method pow].
 				[codeblock]
 				a = exp(2) # Approximately 7.39
 				[/codeblock]
@@ -1095,7 +1096,7 @@
 			<argument index="0" name="step" type="float">
 			</argument>
 			<description>
-				Returns the position of the first non-zero digit, after the decimal point.
+				Returns the position of the first non-zero digit, after the decimal point. Note that the maximum return value is 10, which is a design decision in the implementation.
 				[codeblock]
 				# n is 0
 				n = step_decimals(5)

@@ -479,7 +479,7 @@ void CPUParticles::_particles_process(float p_delta) {
 		if (!emitting && !p.active) continue;
 
 		// Handle time updates
-		float restart_time = (float(i) / float(pcount)) * lifetime;
+		float restart_time = (float(i) / float(pcount)) * p.lifetime;
 		float local_delta = p_delta;
 
 		// Handle randomness updates
@@ -511,7 +511,7 @@ void CPUParticles::_particles_process(float p_delta) {
 			if (restart_time >= prev_time) {
 				restart = true;
 				if (fractional_delta) {
-					local_delta = lifetime - restart_time + time;
+					local_delta = p.lifetime - restart_time + time;
 				}
 			} else if (restart_time < time) {
 				restart = true;
@@ -657,7 +657,7 @@ void CPUParticles::_particles_process(float p_delta) {
 			// Update time
 			// custom[1] is normalized lifetime...
 			p.time += local_delta;
-			p.custom[1] = p.time / lifetime;
+			p.custom[1] = p.time / p.lifetime;
 
 			// Get values from curve textures (with defaults for unset curves)
 			const float normalized_lifetime = p.custom[1];
@@ -745,7 +745,7 @@ void CPUParticles::_particles_process(float p_delta) {
 				// float angle = parameters[PARAM_ANGLE] * get_parameter_variation( PARAM_ANGLE, alt_seed );
 				// angle += tex_angle;
 
-				const float last_tex_angle = get_parameter_curve_value(PARAM_ANGLE, (p.time - local_delta) / lifetime, 0.0);
+				const float last_tex_angle = get_parameter_curve_value(PARAM_ANGLE, (p.time - local_delta) / p.lifetime, 0.0);
 
 				float angle_delta = tex_angle - last_tex_angle;
 

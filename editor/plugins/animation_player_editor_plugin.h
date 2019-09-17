@@ -39,9 +39,6 @@
 #include "scene/gui/spin_box.h"
 #include "scene/gui/texture_button.h"
 
-/**
-	@author Juan Linietsky <reduzio@gmail.com>
-*/
 class AnimationTrackEditor;
 class AnimationPlayerEditorPlugin;
 
@@ -164,6 +161,7 @@ class AnimationPlayerEditor : public VBoxContainer {
 	} onion;
 
 	void _select_anim_by_name(const String &p_anim);
+	double _get_editor_step() const;
 	void _play_pressed();
 	void _play_from_pressed();
 	void _play_bw_pressed();

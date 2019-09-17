@@ -71,8 +71,7 @@ void Resource::set_path(const String &p_path, bool p_take_over) {
 			bool exists = ResourceCache::resources.has(p_path);
 			ResourceCache::lock->read_unlock();
 
-			ERR_EXPLAIN("Another resource is loaded from path: " + p_path + " (possible cyclic resource inclusion)");
-			ERR_FAIL_COND(exists);
+			ERR_FAIL_COND_MSG(exists, "Another resource is loaded from path: " + p_path + " (possible cyclic resource inclusion).");
 		}
 	}
 	path_cache = p_path;
@@ -244,8 +243,7 @@ void Resource::unregister_owner(Object *p_owner) {
 void Resource::notify_change_to_owners() {
 	for (Set<ObjectID>::Element *E = owners.front(); E; E = E->next()) {
 		Object *obj = ObjectDB::get_instance(E->get());
-		ERR_EXPLAIN("Object was deleted, while still owning a resource");
-		ERR_CONTINUE(!obj); //wtf
+		ERR_CONTINUE_MSG(!obj, "Object was deleted, while still owning a resource."); //wtf
 		//TODO store string
 		obj->call("resource_changed", RES(this));
 	}
@@ -382,7 +380,7 @@ Resource::~Resource() {
 		ResourceCache::lock->write_unlock();
 	}
 	if (owners.size()) {
-		WARN_PRINT("Resource is still owned");
+		WARN_PRINT("Resource is still owned.");
 	}
 }
 

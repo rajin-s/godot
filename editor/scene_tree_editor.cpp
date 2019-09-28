@@ -176,7 +176,7 @@ bool SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 			(show_enabled_subscene || can_open_instance)
 			&& p_node->get_owner()
 			&& get_scene_node()->is_editable_instance(p_node->get_owner())
-			&& (p_node->is_exported() || (p_node->get_owner() != NULL && p_node->get_owner()->is_exported()))
+			&& (!p_node->is_hidden_in_instance() || (p_node->get_owner() != NULL && p_node->get_owner()->get_show_all_children()))
 		) {
 			part_of_subscene = true;
 			//allow

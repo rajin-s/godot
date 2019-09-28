@@ -326,8 +326,11 @@ public:
 	void set_editable_instances(const HashMap<NodePath, int> &p_editable_instances);
 	HashMap<NodePath, int> get_editable_instances() const;
 
-	void set_exported(const bool p_exported);
-	bool is_exported() const;
+	void set_hide_in_instance(const bool p_hide_in_instance);
+	bool is_hidden_in_instance() const;
+	
+	void set_show_all_children(const bool p_show_all_children);
+	bool get_show_all_children() const;
 
 	/* NOTIFICATIONS */
 

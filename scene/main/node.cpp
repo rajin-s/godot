@@ -1912,12 +1912,23 @@ bool Node::is_editable_instance(const Node *p_node) const {
 	return data.editable_instances.has(p);
 }
 
-void Node::set_exported(const bool p_exported) {
-	set_meta("_export_by_default_", p_exported);
+void Node::set_hide_in_instance(const bool p_hide_in_instance) {
+	set_meta("_hide_in_instance_", p_hide_in_instance);
 }
-bool Node::is_exported() const {
-	if (has_meta("_export_by_default_")) {
-		return get_meta("_export_by_default_");
+bool Node::is_hidden_in_instance() const {
+	if (has_meta("_hide_in_instance_")) {
+		return get_meta("_hide_in_instance_");
+	} else {
+		return false;
+	}
+}
+
+void Node::set_show_all_children(const bool p_show_all_children) {
+	set_meta("_show_all_children_", p_show_all_children);
+}
+bool Node::get_show_all_children() const {
+	if (has_meta("_show_all_children_")) {
+		return get_meta("_show_all_children_");
 	} else {
 		return false;
 	}
@@ -2816,9 +2827,13 @@ void Node::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_get_editor_description"), &Node::get_editor_description);
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "editor_description", PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_INTERNAL), "_set_editor_description", "_get_editor_description");
 	
-	ClassDB::bind_method(D_METHOD("_set_exported", "exported"), &Node::set_exported);
-	ClassDB::bind_method(D_METHOD("_get_exported"), &Node::is_exported);
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "export_by_default", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_INTERNAL), "_set_exported", "_get_exported");
+	ClassDB::bind_method(D_METHOD("_set_hide_in_instance", "hide_in_instance"), &Node::set_hide_in_instance);
+	ClassDB::bind_method(D_METHOD("_get_hide_in_instance"), &Node::is_hidden_in_instance);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "hide_in_instance", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_STORAGE), "_set_hide_in_instance", "_get_hide_in_instance");
+	
+	ClassDB::bind_method(D_METHOD("_set_show_all_children", "show_all_children"), &Node::set_show_all_children);
+	ClassDB::bind_method(D_METHOD("_get_show_all_children"), &Node::get_show_all_children);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_all_children", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_STORAGE), "_set_show_all_children", "_get_show_all_children");
 
 	ClassDB::bind_method(D_METHOD("_set_import_path", "import_path"), &Node::set_import_path);
 	ClassDB::bind_method(D_METHOD("_get_import_path"), &Node::get_import_path);

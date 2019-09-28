@@ -326,6 +326,9 @@ public:
 	void set_editable_instances(const HashMap<NodePath, int> &p_editable_instances);
 	HashMap<NodePath, int> get_editable_instances() const;
 
+	void set_exported(const bool p_exported);
+	bool is_exported() const;
+
 	/* NOTIFICATIONS */
 
 	void propagate_notification(int p_notification);

@@ -175,6 +175,7 @@ private:
 	float get_parameter_curve_value(int parameter, float t, float default_value);
 	float get_parameter_variation(int parameter, uint32_t &seed);
 
+	void _update_internal();
 	void _particles_process(float p_delta);
 	void _update_particle_data_buffer();
 

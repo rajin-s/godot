@@ -72,9 +72,12 @@ void EditorHelp::_unhandled_key_input(const Ref<InputEvent> &p_ev) {
 	}
 }
 
-void EditorHelp::_search(const String &) {
+void EditorHelp::_search(bool p_search_previous) {
 
-	find_bar->search_next();
+	if (p_search_previous)
+		find_bar->search_prev();
+	else
+		find_bar->search_next();
 }
 
 void EditorHelp::_class_list_select(const String &p_select) {
@@ -169,7 +172,9 @@ void EditorHelp::_class_desc_input(const Ref<InputEvent> &p_input) {
 void EditorHelp::_class_desc_resized() {
 	// Add extra horizontal margins for better readability.
 	// The margins increase as the width of the editor help container increases.
-	const int display_margin = MAX(30 * EDSCALE, get_parent_anchorable_rect().size.width - 900 * EDSCALE) * 0.5;
+	Ref<Font> doc_code_font = get_font("doc_source", "EditorFonts");
+	real_t char_width = doc_code_font->get_char_size('x').width;
+	const int display_margin = MAX(30 * EDSCALE, get_parent_anchorable_rect().size.width - char_width * 120 * EDSCALE) * 0.5;
 
 	Ref<StyleBox> class_desc_stylebox = EditorNode::get_singleton()->get_theme_base()->get_stylebox("normal", "RichTextLabel")->duplicate();
 	class_desc_stylebox->set_default_margin(MARGIN_LEFT, display_margin);
@@ -1464,6 +1469,11 @@ void EditorHelp::_notification(int p_what) {
 
 			_update_doc();
 		} break;
+		case NOTIFICATION_THEME_CHANGED: {
+			if (is_visible_in_tree()) {
+				_class_desc_resized();
+			}
+		} break;
 		default: break;
 	}
 }
@@ -1502,8 +1512,8 @@ String EditorHelp::get_class() {
 	return edited_class;
 }
 
-void EditorHelp::search_again() {
-	_search(prev_search);
+void EditorHelp::search_again(bool p_search_previous) {
+	_search(p_search_previous);
 }
 
 int EditorHelp::get_scroll() const {

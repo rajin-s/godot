@@ -43,8 +43,18 @@ PoolVector<Face3> CPUParticles::get_faces(uint32_t p_usage_flags) const {
 }
 
 void CPUParticles::set_emitting(bool p_emitting) {
+
+	if (emitting == p_emitting)
+		return;
+
 	emitting = p_emitting;
-	set_process_internal(true);
+	if (emitting) {
+		set_process_internal(true);
+
+		// first update before rendering to avoid one frame delay after emitting starts
+		if (time == 0)
+			_update_internal();
+	}
 }
 
 void CPUParticles::set_amount(int p_amount) {
@@ -205,6 +215,7 @@ void CPUParticles::restart() {
 	inactive_time = 0;
 	frame_remainder = 0;
 	cycle = 0;
+	emitting = false;
 
 	{
 		int pc = particles.size();
@@ -214,6 +225,8 @@ void CPUParticles::restart() {
 			w[i].active = false;
 		}
 	}
+
+	set_emitting(true);
 }
 
 void CPUParticles::set_spread(float p_spread) {
@@ -443,6 +456,82 @@ float CPUParticles::get_parameter_curve_value(int parameter, float t, float defa
 		return default_value;
 	}
 }
+void CPUParticles::_update_internal() {
+
+	if (particles.size() == 0 || !is_visible_in_tree()) {
+		_set_redraw(false);
+		return;
+	}
+
+	float delta = get_process_delta_time();
+	if (emitting) {
+		inactive_time = 0;
+	} else {
+		inactive_time += delta;
+		if (inactive_time > lifetime * 1.2) {
+			set_process_internal(false);
+			_set_redraw(false);
+
+			//reset variables
+			time = 0;
+			inactive_time = 0;
+			frame_remainder = 0;
+			cycle = 0;
+			return;
+		}
+	}
+	_set_redraw(true);
+
+	bool processed = false;
+
+	if (time == 0 && pre_process_time > 0.0) {
+
+		float frame_time;
+		if (fixed_fps > 0)
+			frame_time = 1.0 / fixed_fps;
+		else
+			frame_time = 1.0 / 30.0;
+
+		float todo = pre_process_time;
+
+		while (todo >= 0) {
+			_particles_process(frame_time);
+			processed = true;
+			todo -= frame_time;
+		}
+	}
+
+	if (fixed_fps > 0) {
+		float frame_time = 1.0 / fixed_fps;
+		float decr = frame_time;
+
+		float ldelta = delta;
+		if (ldelta > 0.1) { //avoid recursive stalls if fps goes below 10
+			ldelta = 0.1;
+		} else if (ldelta <= 0.0) { //unlikely but..
+			ldelta = 0.001;
+		}
+		float todo = frame_remainder + ldelta;
+
+		while (todo >= frame_time) {
+			_particles_process(frame_time);
+			processed = true;
+			todo -= decr;
+		}
+
+		frame_remainder = todo;
+
+	} else {
+		_particles_process(delta);
+		processed = true;
+	}
+
+	if (processed) {
+		_update_particle_data_buffer();
+	}
+}
+
+void CPUParticles::_particles_process(float p_delta) {
 
 float CPUParticles::get_parameter_variation(int parameter, uint32_t &seed) {
 	return Math::lerp(1.0f, rand_from_seed(seed), randomness[parameter]);
@@ -1009,83 +1098,25 @@ void CPUParticles::_update_render_thread() {
 
 void CPUParticles::_notification(int p_what) {
 	if (p_what == NOTIFICATION_ENTER_TREE) {
-		_set_redraw(true);
+		set_process_internal(emitting);
+
+		// first update before rendering to avoid one frame delay after emitting starts
+		if (emitting && (time == 0))
+			_update_internal();
 	}
 
 	if (p_what == NOTIFICATION_EXIT_TREE) {
 		_set_redraw(false);
 	}
 
+	if (p_what == NOTIFICATION_VISIBILITY_CHANGED) {
+		// first update before rendering to avoid one frame delay after emitting starts
+		if (emitting && (time == 0))
+			_update_internal();
+	}
+
 	if (p_what == NOTIFICATION_INTERNAL_PROCESS) {
-		if (particles.size() == 0 || !is_visible_in_tree()) {
-			_set_redraw(false);
-			return;
-		}
-
-		float delta = get_process_delta_time();
-		if (emitting) {
-			_set_redraw(true);
-			inactive_time = 0;
-		} else {
-			inactive_time += delta;
-			if (inactive_time > lifetime * 1.2) {
-				set_process_internal(false);
-				_set_redraw(false);
-
-				// reset variables
-				time = 0;
-				inactive_time = 0;
-				frame_remainder = 0;
-				cycle = 0;
-				return;
-			}
-		}
-
-		bool processed = false;
-
-		if (time == 0 && pre_process_time > 0.0) {
-			float frame_time;
-			if (fixed_fps > 0)
-				frame_time = 1.0 / fixed_fps;
-			else
-				frame_time = 1.0 / 30.0;
-
-			float todo = pre_process_time;
-
-			while (todo >= 0) {
-				_particles_process(frame_time);
-				processed = true;
-				todo -= frame_time;
-			}
-		}
-
-		if (fixed_fps > 0) {
-			float frame_time = 1.0 / fixed_fps;
-			float decr = frame_time;
-
-			float ldelta = delta;
-			if (ldelta > 0.1) { // avoid recursive stalls if fps goes below 10
-				ldelta = 0.1;
-			} else if (ldelta <= 0.0) { // unlikely but..
-				ldelta = 0.001;
-			}
-			float todo = frame_remainder + ldelta;
-
-			while (todo >= frame_time) {
-				_particles_process(frame_time);
-				processed = true;
-				todo -= decr;
-			}
-
-			frame_remainder = todo;
-		} else {
-			_particles_process(delta);
-			processed = true;
-		}
-
-		if (processed) {
-			_update_particle_data_buffer();
-		}
+		_update_internal();
 	}
 }
 
@@ -1363,6 +1394,7 @@ CPUParticles::CPUParticles() {
 	frame_remainder = 0;
 	cycle = 0;
 	redraw = false;
+	emitting = false;
 
 	multimesh = VisualServer::get_singleton()->multimesh_create();
 	set_base(multimesh);

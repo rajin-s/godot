@@ -531,8 +531,6 @@ void CPUParticles::_update_internal() {
 	}
 }
 
-void CPUParticles::_particles_process(float p_delta) {
-
 float CPUParticles::get_parameter_variation(int parameter, uint32_t &seed) {
 	return Math::lerp(1.0f, rand_from_seed(seed), randomness[parameter]);
 }
